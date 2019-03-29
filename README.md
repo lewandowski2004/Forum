@@ -9,7 +9,7 @@ Technologies:
 
 Project patterns:
 
-MVC
+- MVC
 
 Short description of the functionality:
 
