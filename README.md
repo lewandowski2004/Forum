@@ -3,9 +3,9 @@ Forum Project
 
 Technologies:
 
--Java (Spring / security)
--Data (Hibernate / JPA)
--View (JSP / HTML / Bootstrap)
+- Java (Spring / security)
+- Data (Hibernate / JPA)
+- View (JSP / HTML / Bootstrap)
 
 Project patterns:
 
