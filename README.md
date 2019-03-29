@@ -5,6 +5,7 @@ Technologies:
 
 - Java (Spring / security)
 - Data (Hibernate / JPA)
+- XML ( Configuration)
 - View (JSP / HTML / Bootstrap)
 
 Project patterns:
