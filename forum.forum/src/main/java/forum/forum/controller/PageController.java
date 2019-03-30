@@ -55,29 +55,23 @@ public class PageController {
 	@Autowired
 	private EntryDao entryDao;
 
-/* ------------------------------------ LOGIN -------------------------------*/
-
 	@RequestMapping(value = { "/login" })
 	public ModelAndView login() {
 		ModelAndView mv = new ModelAndView("login");
 		return mv;
 	}
-/* ------------------------------------ HOME PAGE -------------------------------*/
 	
 	@RequestMapping(value = { "/", "/home", "/index" }, method = RequestMethod.GET)
-	public ModelAndView start(HttpServletRequest request, HttpServletResponse response,
+	public ModelAndView Index(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam(name = "idd", required = false) String id) {
 		ModelAndView mv = new ModelAndView("index");
 
 		mv.addObject("topics", topicDao.getAllTopics());
-		/*mv.addObject("ilosc", iTemat.pobierzIloscTematowWKategori(id));*/
 		return mv;
 	}
-
-/* ------------------------------------ TOPIC IN CATEGORY -------------------------------*/
 	
 	@RequestMapping("/TopicInCategory")
-	public ModelAndView TopicInCategory(HttpServletRequest request, HttpServletResponse response,
+	public ModelAndView getTopicByCategory(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam(name = "id", required = false) String id) {
 		ModelAndView mv = new ModelAndView("indexCategory");
 		
@@ -88,8 +82,6 @@ public class PageController {
 		
 		return mv;
 	}
-
-/* ------------------------------------ LOGOUT -------------------------------*/	
 	
 	@RequestMapping(value = "/perform-logout")
 	public String logout(HttpServletRequest request, HttpServletResponse response) {
@@ -100,11 +92,9 @@ public class PageController {
 		}
 		return "redirect:/login?logout";
 	}
-
-/* ------------------------------------ REGISTER -------------------------------*/
 	
 	@RequestMapping(value = "/register", method = RequestMethod.GET)
-	public ModelAndView Register(HttpServletRequest request, HttpServletResponse response,
+	public ModelAndView registerUserForm(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam(name="success", required=false)String success) {
 		ModelAndView mv = new ModelAndView("register");
 
@@ -120,7 +110,7 @@ public class PageController {
 	}
 
 	@RequestMapping(value = "/register", method = RequestMethod.POST)
-	public String RegisterUser( 
+	public String RegisterUserAction( 
 			@Valid @ModelAttribute("user") User user,BindingResult results,Model model, 
 			@RequestParam(name = "login", required = false) String login,
 			@RequestParam(name = "password", required = false) String password,
@@ -151,7 +141,6 @@ public class PageController {
 		return "register";
 	}
 
-/* ------------------------------------ CATEGORY  -------------------------------*/
 	@ModelAttribute("subcategories")
 	public List<Subcategory> getKategoria(){
 		return subcategoryDao.getAllSubcategories();
@@ -162,12 +151,8 @@ public class PageController {
 		return categoryDao.getAllCategories();
 	}
 	
-	
-	
-/* ------------------------------------ TOPIC -------------------------------*/
-	
 	@RequestMapping("/topic")
-	public ModelAndView temat(Model model, HttpServletRequest request, @ModelAttribute("topic") Topic topic,
+	public ModelAndView getTopic(Model model, HttpServletRequest request, @ModelAttribute("topic") Topic topic,
 			@RequestParam(name = "id", required = false) String stringId) {
 		ModelAndView mv = new ModelAndView("topic");
 		mv.addObject("entry", new Entry());
@@ -177,12 +162,11 @@ public class PageController {
 			Topic t = topicDao.getTopic(id);
 			mv.addObject("topic", t);
 		}
-
 		return mv;
 	}
-/* ------------------------------------ NEW TOPIC -------------------------------*/
+
 	@RequestMapping(value = "/newTopic", method = RequestMethod.GET)
-	public ModelAndView NewTopic(HttpServletRequest request, HttpServletResponse response) {
+	public ModelAndView addTopicForm(HttpServletRequest request, HttpServletResponse response) {
 		ModelAndView mav = new ModelAndView("newTopic");
 		mav.addObject("topic", new Topic());
 
@@ -190,12 +174,11 @@ public class PageController {
 	}
 	
 	@RequestMapping(value = "/newTopic", method = RequestMethod.POST)
-	public String NewTopic(HttpServletRequest request, HttpServletResponse response,
+	public String addTopicAction(HttpServletRequest request, HttpServletResponse response,
 			@ModelAttribute("topic") Topic topic, @RequestParam(name = "title", required = false) String title,
 			@RequestParam(name = "content", required = false) String content,
 			@RequestParam(name = "cat", required = false) String category) {
 		ModelAndView mav = new ModelAndView("newTopic");
-		/* String uzytkownik = request.getParameter("uzytkownik"); */
 
 		if (!"".equals(title) && !"".equals(content)) {
 			
@@ -203,8 +186,7 @@ public class PageController {
 			User uzytkowni = userDao.getUserLogin(authentication.getName());
 		
 			int id = Integer.parseInt(category); 
-			Subcategory k = subcategoryDao.getSubcategory(id);
-			 
+			Subcategory k = subcategoryDao.getSubcategory(id);	 
 			 
 			 Date d = new Date();
 			 topic.setCategory(k);
@@ -213,17 +195,14 @@ public class PageController {
 			 topic.setContent(content);
 			 topic.setTitle(title);
 			
-
 			if (topicDao.addTopic(topic))
 				return "redirect:/topic?id=" + topic.getId();
 		}
-		
 			return "newTopic";
 	}
 	
-	/* ------------------------------------ MESSAGE -------------------------------*/
 	@RequestMapping(value = "/message", method = RequestMethod.GET)
-	public ModelAndView message(HttpServletRequest request, HttpServletResponse response) {
+	public ModelAndView addMessageForm(HttpServletRequest request, HttpServletResponse response) {
 		ModelAndView mav = new ModelAndView("message");
 		mav.addObject("message", new Message());
 
@@ -231,38 +210,40 @@ public class PageController {
 	}
 	
 	@RequestMapping(value = "/message", method = RequestMethod.POST)
-	public String message(HttpServletRequest request, HttpServletResponse response,
+	public String addMessageAction(HttpServletRequest request, HttpServletResponse response,
 			@ModelAttribute("message") Message message, 
 			@RequestParam(name = "title", required = false) String title,
 			@RequestParam(name = "content", required = false) String content) {
 		ModelAndView mav = new ModelAndView("message");
-		/* String uzytkownik = request.getParameter("uzytkownik"); */
 
 		if (!"".equals(title) && !"".equals(content)) {
 			
 			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 			User uzytkowni = userDao.getUserLogin(authentication.getName());
-		
 			
 			 Date d = new Date();
 			 message.setTitle(title);
 			 message.setDate(d);
 			 message.setContent(content);
-			 message.setUser(uzytkowni);
-
-			
+			 message.setUser(uzytkowni);	
 
 			if (messageDao.addMessage(message))
 				return "redirect:/index";
-		}
-		
+		}	
 			return "message";
 	}
 	
 	
-/* ------------------------------------ ENTRY -------------------------------*/
+	@RequestMapping(value = "/entry", method = RequestMethod.GET)
+	public ModelAndView addEntryForm(HttpServletRequest request, HttpServletResponse response) {
+		ModelAndView mav = new ModelAndView("topic");
+		mav.addObject("entry", new Entry());
+		
+		return mav;
+	}
+	
 	@RequestMapping(value = "/entry", method = RequestMethod.POST)
-	public String Entry(HttpServletRequest request, HttpServletResponse response,
+	public String addEntryAction(HttpServletRequest request, HttpServletResponse response,
 			@ModelAttribute("entry") Entry entry, @RequestParam(name = "idd", required = false) String id,
 			@RequestParam(name = "content", required = false) String content) {
 		
@@ -284,20 +265,18 @@ public class PageController {
 				return "redirect:/topic?id=" + id;
 			
 		}
-			return "redirect:/topic?id=" + id;
-		
+			return "redirect:/topic?id=" + id;	
 	}
-	@RequestMapping(value = "/entry", method = RequestMethod.GET)
-	public ModelAndView Entry(HttpServletRequest request, HttpServletResponse response) {
+	
+	@RequestMapping(value = "/secondaryEntry", method = RequestMethod.GET)
+	public ModelAndView addSecondaryEntryForm(HttpServletRequest request, HttpServletResponse response) {
 		ModelAndView mav = new ModelAndView("topic");
-		mav.addObject("entry", new Entry());
-		
+		mav.addObject("secondaryEntry", new SecondaryEntry());	
 		return mav;
 	}
 	
-	/* ------------------------------------ ENTRY -------------------------------*/
 	@RequestMapping(value = "/secondaryEntry", method = RequestMethod.POST)
-	public String SecondaryEntry(HttpServletRequest request, HttpServletResponse response,
+	public String addSecondaryEntryAction(HttpServletRequest request, HttpServletResponse response,
 			@ModelAttribute("secondaryEntry") SecondaryEntry secondaryEntry, @RequestParam(name = "idd", required = false) String id,
 			 @RequestParam(name = "idTopic", required = false) String idTopic,
 			@RequestParam(name = "content", required = false) String content) {
@@ -306,7 +285,6 @@ public class PageController {
 			
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		User uzytkowni = userDao.getUserLogin(authentication.getName());
-		
 		
 			int idd = Integer.parseInt(id);
 			Entry e = entryDao.getEntry(idd);
@@ -317,20 +295,9 @@ public class PageController {
 			secondaryEntry.setEntry(e);
 			
 			if(secondaryEntryDao.addSecondaryEntry(secondaryEntry))
-				return "redirect:/topic?id=" + idTopic;
-			
+				return "redirect:/topic?id=" + idTopic;	
 		}
-			return "redirect:/topic?id=" + idTopic;
-		
+			return "redirect:/topic?id=" + idTopic;	
 	}
-	@RequestMapping(value = "/secondaryEntry", method = RequestMethod.GET)
-	public ModelAndView SecondaryEntry(HttpServletRequest request, HttpServletResponse response) {
-		ModelAndView mav = new ModelAndView("topic");
-		mav.addObject("secondaryEntry", new SecondaryEntry());
-		
-		return mav;
-	}
-	
-	
 
 }
