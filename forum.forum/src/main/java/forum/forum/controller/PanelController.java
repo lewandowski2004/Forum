@@ -53,35 +53,31 @@ public class PanelController {
 	private static final Logger logger = LoggerFactory.getLogger(PanelController.class);
 	
 	
-	@RequestMapping(value = { "/users" }, method = RequestMethod.GET)
-	public ModelAndView start(
+	@RequestMapping(value = { "/deleteUser" }, method = RequestMethod.GET)
+	public ModelAndView deleteUser(
 			@RequestParam(name="success", required=false)String success,
 			@RequestParam(name = "id", required = false) String stringId) {
 		ModelAndView mv = new ModelAndView("users");
-
 		mv.addObject("users", userDao.getAllUsers());
 		
-	
 		if(success != null) {
 			if(success.equals("delete")) {
 				mv.addObject("message", "Usuwanie zakończone powodzeniem !");
 			}
-		}
-		
+		}	
 		return mv;
 	}
-		@RequestMapping(value = { "/users" }, method = RequestMethod.POST)
-		public String Users(
-				@ModelAttribute("user") User user,
-				@RequestParam(name = "id", required = false) String stringId) {
+	@RequestMapping(value = { "/deleteUser" }, method = RequestMethod.POST)
+	public String deleteUser(@ModelAttribute("user") User user,
+			@RequestParam(name = "id", required = false) String stringId) {
 
-				int id = Integer.parseInt(stringId);
-				userDao.delete(id);
-				return "redirect:/panel/users?success=delete";
-			
-		}
-	@RequestMapping(value = { "/user" }, method = RequestMethod.GET)
-	public ModelAndView User(HttpServletRequest request, HttpServletResponse response,
+		int id = Integer.parseInt(stringId);
+		userDao.delete(id);
+		return "redirect:/panel/deleteUser?success=delete";		
+	}
+	
+	@RequestMapping(value = { "/getUser" }, method = RequestMethod.GET)
+	public ModelAndView getUser(HttpServletRequest request, HttpServletResponse response,
 			@ModelAttribute("user") User user, @RequestParam(name = "login", required = false) String login,
 			@RequestParam(name = "email", required = false) String email,
 			@RequestParam(name = "firstname", required = false) String firstname,
@@ -90,7 +86,6 @@ public class PanelController {
 		
 		ModelAndView mv = new ModelAndView("user");
 		ModelAndView mvc = new ModelAndView("users");
-		
 		mvc.addObject("users", userDao.getAllUsers());
 		
 		if (stringId != null) {
@@ -98,12 +93,11 @@ public class PanelController {
 			User u = userDao.getUser(id);
 			mv.addObject("user", u);
 		}
-		
-
 		return mv;
 	}
-	@RequestMapping(value= {"/user"}, method = RequestMethod.POST)
-	public String User(HttpServletRequest request,
+	
+	@RequestMapping(value= {"/getUser"}, method = RequestMethod.POST)
+	public String getUser(HttpServletRequest request,
 			@Valid @ModelAttribute("user") User user,BindingResult results,Model model, 
 			@RequestParam(name = "login", required = false) String login,
 			@RequestParam(name = "email", required = false) String email,
@@ -116,31 +110,26 @@ public class PanelController {
 		if(results.hasErrors()) {
 			return "redirect:/panel/user?id="+ stringId;
 		}
-		
 		int id = Integer.parseInt(stringId);
-		
 		switch (action.toLowerCase()) {
-			case "zaktualizuj":
+			case "update":
 				if (userDao.getUserLogin(login) != null) {
 					model.addAttribute("blad", "taki login juz istnieje !!!");
 				} else
 				if (userDao.edit(user))
 					return "redirect:/panel/users?success=update";
-					break;
-				
+					break;	
 			case "delete":
 				if(userDao.delete(id))
 				return "redirect:/panel/users?success=delete";
 				break;
 		}
 		return "redirect:/panel/user?id="+ stringId;
-		
-
-		
+			
 	}
 	
-	@RequestMapping(value = { "/viewMessage" }, method = RequestMethod.GET)
-	public ModelAndView viewMessage(HttpServletRequest request, HttpServletResponse response,
+	@RequestMapping(value = { "/getMessage" }, method = RequestMethod.GET)
+	public ModelAndView getMessage(HttpServletRequest request, HttpServletResponse response,
 			@ModelAttribute("viewMessage") Message message,
 	@RequestParam(name = "id", required = false) String id){
 		
@@ -156,18 +145,17 @@ public class PanelController {
 
 		return mv;
 	}
-	@RequestMapping(value= {"/viewMessage"}, method = RequestMethod.POST)
-	public ModelAndView viewMessagee(HttpServletRequest request,
+	@RequestMapping(value= {"/getMessage"}, method = RequestMethod.POST)
+	public ModelAndView getMessagee(HttpServletRequest request,
 			@ModelAttribute("viewMessage") Message message,
 			@RequestParam(name = "id", required = false) String id) {
 		
 		ModelAndView mv = new ModelAndView("viewMessage");
 				return mv;
-		
 		}
 	
-	@RequestMapping(value = "/category", method = RequestMethod.GET)
-	public ModelAndView Category(HttpServletRequest request, HttpServletResponse response,
+	@RequestMapping(value = "/addCategory", method = RequestMethod.GET)
+	public ModelAndView addCategoryForm(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam(name="success", required=false)String success) {
 		ModelAndView mv = new ModelAndView("addCategory");
 
@@ -179,46 +167,40 @@ public class PanelController {
 		}
 		return mv;
 	}
-	@RequestMapping(value= {"/category"}, method = RequestMethod.POST)
-	public String Categoryy(
+	@RequestMapping(value= {"/addCategory"}, method = RequestMethod.POST)
+	public String addCategoryAction(
 			@Valid @ModelAttribute("category") Category category,BindingResult results,Model model,
 			@RequestParam(name = "name", required = false) String name) {
 		
 		if(results.hasErrors()) {
 			return "addCategory";
 		}
-		
 		logger.info(category.toString());
 		
 			if (categoryDao.getNameCategory(name) != null) {
 				model.addAttribute("blad", "taka nazwa juz istnieje !!!");
 			} else {
 				categoryDao.addCategory(category);
-				return "redirect:/panel/category?success=category";
+				return "redirect:/panel/addCategory?success=category";
 			}
-
 		return "addCategory";
 	}
-	@RequestMapping(value = "/subcategory", method = RequestMethod.GET)
-	public ModelAndView subcategory(HttpServletRequest request, HttpServletResponse response,
+	@RequestMapping(value = "/addSubcategory", method = RequestMethod.GET)
+	public ModelAndView addSubcategoryForm(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam(name="success", required=false)String success) {
 		ModelAndView mv = new ModelAndView("addSubcategory");
 
 		mv.addObject("subcategory", new Subcategory());
 		if(success != null) {
 			if(success.equals("subcategory")) {
-				mv.addObject("message", "Kategoria dodana !");
+				mv.addObject("message", "podkategoria dodana !");
 			}
 		}
 		return mv;
 	}
-	@ModelAttribute("categories")
-	public List<Category> getSubkategoria(){
-		return categoryDao.getAllCategories();
-	}
 
-	@RequestMapping(value= {"/subcategory"}, method = RequestMethod.POST)
-	public String Subcategoryy(
+	@RequestMapping(value= {"/addSubcategory"}, method = RequestMethod.POST)
+	public String addSubcategoryAction(
 			@Valid @ModelAttribute("subcategory") Subcategory subcategory,BindingResult results,Model model,
 			@RequestParam(name = "name", required = false) String name,
 			@RequestParam(name = "cat", required = false) String category){
@@ -226,7 +208,6 @@ public class PanelController {
 		if(results.hasErrors()) {
 			return "addSubcategory";
 		}
-		
 		logger.info(subcategory.toString());
 		
 			if (subcategoryDao.getNameSubcategory(name) != null) {
@@ -238,15 +219,14 @@ public class PanelController {
 				 subcategory.setCategory(c);
 				 subcategory.setName(name);
 				subcategoryDao.addSubcategory(subcategory);
-				return "redirect:/panel/subcategory?success=subcategory";
+				return "redirect:/panel/addSubcategory?success=subcategory";
 			}
-
 		return "addSubcategory";
 	}
 	
 	
-	@RequestMapping(value = { "/topics" }, method = RequestMethod.GET)
-	public ModelAndView Topic(HttpServletRequest request,
+	@RequestMapping(value = { "/deleteTopic" }, method = RequestMethod.GET)
+	public ModelAndView deleteTopic(HttpServletRequest request,
 			@RequestParam(name="success", required=false)String success) {
 		ModelAndView mv = new ModelAndView("topics");
 
@@ -259,19 +239,19 @@ public class PanelController {
 		}
 		return mv;
 	}
-	@RequestMapping(value = { "/topics" }, method = RequestMethod.POST)
-	public String TopicForm(
+	@RequestMapping(value = { "/deleteTopic" }, method = RequestMethod.POST)
+	public String deleteTopic(
 			@ModelAttribute("topic") Topic topic,
 			@RequestParam(name = "id", required = false) String stringId) {
 
 		int id = Integer.parseInt(stringId);
 		topicDao.delete(id);
-		return "redirect:/panel/topics?success=delete";
+		return "redirect:/panel/topic?success=delete";
 	}
 	
 	
-	@RequestMapping(value = { "/messages" }, method = RequestMethod.GET)
-	public ModelAndView Messages(HttpServletRequest request,
+	@RequestMapping(value = { "/deleteMessage" }, method = RequestMethod.GET)
+	public ModelAndView deleteMessage(HttpServletRequest request,
 			@RequestParam(name="success", required=false)String success) {
 		ModelAndView mv = new ModelAndView("messages");
 
@@ -284,13 +264,18 @@ public class PanelController {
 		}
 		return mv;
 	}
-	@RequestMapping(value = { "/messages" }, method = RequestMethod.POST)
-	public String Messages(
+	@RequestMapping(value = { "/deleteMessage" }, method = RequestMethod.POST)
+	public String deleteMessage(
 			@ModelAttribute("messages") Message message,
 			@RequestParam(name = "id", required = false) String stringId) {
 
 		int id = Integer.parseInt(stringId);
 		messageDao.delete(id);
-		return "redirect:/panel/messages?success=delete";
+		return "redirect:/panel/deleteMessage?success=delete";
+	}
+	
+	@ModelAttribute("categories")
+	public List<Category> getSubkategoria(){
+		return categoryDao.getAllCategories();
 	}
 }
